@@ -17,7 +17,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardController {
 
+    // 네이티브 쿼리 연습
     private final BoardNativeRepository boardNativeRepository;
+    // JPA, API, JPQL
+    private final BoardRepository boardRepository;
+
+    // 특정 게시글 요청 화면
+    @GetMapping("/board/{id}")
+    public String detail(@PathVariable(name = "id") Integer id, HttpServletRequest request) {
+        // JPA API 사용
+        // Board board = boardRepository.findById(id);
+
+        // JPQL FETCH join 사용
+        Board board = boardRepository.findByIdJoinUser(id);
+        request.setAttribute("board", board);
+        return "board/detail";
+    }
 
     @GetMapping("/")
     public String index(Model model) {
@@ -39,14 +54,6 @@ public class BoardController {
         log.warn("save 실행 : 제목={}, 내용={}", title, content);
         boardNativeRepository.save(title, content);
         return "redirect:/";
-    }
-
-    // 특정 게시글 요청 화면
-    @GetMapping("/board/{id}")
-    public String detail(@PathVariable(name = "id") Integer id, HttpServletRequest request) {
-        Board board = boardNativeRepository.findById(id);
-        request.setAttribute("board", board);
-        return "board/detail";
     }
 
     // 게시글 삭제
