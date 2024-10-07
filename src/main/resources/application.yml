@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: blog_v1
+
+  profiles:
+    active: dev
