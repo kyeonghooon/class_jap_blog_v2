@@ -1,6 +1,8 @@
 package com.tenco.blog_v1.board;
 
+import com.tenco.blog_v1.user.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -21,6 +23,7 @@ public class BoardController {
     private final BoardNativeRepository boardNativeRepository;
     // JPA, API, JPQL
     private final BoardRepository boardRepository;
+    private final HttpSession session;
 
     // 특정 게시글 요청 화면
     @GetMapping("/board/{id}")
@@ -36,7 +39,9 @@ public class BoardController {
 
     @GetMapping("/")
     public String index(Model model) {
-        List<Board> boardList = boardNativeRepository.findAll();
+        // List<Board> boardList = boardNativeRepository.findAll();
+        // 코드 수정
+        List<Board> boardList = boardRepository.findAll();
         model.addAttribute("boardList", boardList);
         return "index";
     }
@@ -49,10 +54,16 @@ public class BoardController {
 
     // 게시글 저장
     @PostMapping("/board/save")
-    public String save(@RequestParam(name = "title") String title,
-                       @RequestParam(name = "content") String content) {
-        log.warn("save 실행 : 제목={}, 내용={}", title, content);
-        boardNativeRepository.save(title, content);
+    public String save(BoardDTO.SaveDTO reqDTO) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/login-form";
+        }
+        // 파라미터가 올바르게 전달 되었는지 확인
+        log.warn("save 실행 : 제목={}, 내용={}", reqDTO.getTitle(), reqDTO.getContent());
+
+        // SaveDTO에서 toEntity 사용해서 BOard 엔티티로 변환하고 인수 값으로 User 정보를 넣었다.
+        boardRepository.save(reqDTO.toEntity(sessionUser));
         return "redirect:/";
     }
 
@@ -60,7 +71,11 @@ public class BoardController {
     // form 태그에서는 GET, POST 방식만 지원
     @PostMapping("/board/{id}/delete") // form 활용이기 때문에 delete 선언
     public String delete(@PathVariable(name = "id") Integer id, HttpServletRequest request) {
-        boardNativeRepository.deleteById(id);
+        User sessionUser = (User)session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/login-form";
+        }
+        boardRepository.deleteById(id, sessionUser.getId());
         return "redirect:/";
     }
 

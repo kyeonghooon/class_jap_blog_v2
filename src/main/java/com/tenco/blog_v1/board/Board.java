@@ -2,6 +2,7 @@ package com.tenco.blog_v1.board;
 
 import com.tenco.blog_v1.user.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,6 +30,7 @@ public class Board {
     @Column(name = "created_at", insertable = false, updatable = false)
     private Timestamp createdAt;
 
+    @Builder
     public Board(Integer id, String title, String content, User user, Timestamp createdAt) {
         this.id = id;
         this.title = title;
