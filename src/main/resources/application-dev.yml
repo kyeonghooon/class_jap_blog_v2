@@ -6,7 +6,7 @@ server:
   port: 8080
   error:
     whitelabel:
-      enabled: true # 뷰 렌더링 오류 활성화 여부
+      enabled: false # 뷰 렌더링 오류 활성화 여부
 spring:
   mustache:
     servlet:
