@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -33,6 +33,12 @@ public class BoardController {
 
         // JPQL FETCH join 사용
         Board board = boardRepository.findByIdJoinUser(id);
+
+        // 권한 체크
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser != null && board.getUser().getId().equals(sessionUser.getId())){
+            request.setAttribute("authUser", true);
+        }
         request.setAttribute("board", board);
         return "board/detail";
     }
@@ -71,28 +77,66 @@ public class BoardController {
     // form 태그에서는 GET, POST 방식만 지원
     @PostMapping("/board/{id}/delete") // form 활용이기 때문에 delete 선언
     public String delete(@PathVariable(name = "id") Integer id, HttpServletRequest request) {
-        User sessionUser = (User)session.getAttribute("sessionUser");
+        // 유효성, 인증검사
+        // 세션에서 로그인 사용자 정보 가져오기 -> 인증, 인가(권한)
+        User sessionUser = (User) session.getAttribute("sessionUser");
         if (sessionUser == null) {
             return "redirect:/login-form";
         }
-        boardRepository.deleteById(id, sessionUser.getId());
+
+        // 권한 체크
+        Board board = boardRepository.findById(id);
+        if (board == null) {
+            return "redirect:/error-404";
+        }
+
+        if (!board.getUser().getId().equals(sessionUser.getId())) {
+            return "redirect:/error-403";
+        }
+        boardRepository.deleteByIdWithAPI(id);
         return "redirect:/";
     }
 
     // 게시글 수정 화면 요청
     @GetMapping("board/{id}/update-form")
     public String updateForm(@PathVariable(name = "id") Integer id, HttpServletRequest request) {
+        // 1. 게시글 조회
         Board board = boardNativeRepository.findById(id);
+        // 2. 요청 속성에 조회한 게시글 속성 및 값 추가
         request.setAttribute("board", board);
+        // 뷰 리졸브 - 템플릿 반환
         return "board/update-form";
     }
 
     // 게시글 수정 요청 기능
     @PostMapping("board/{id}/update")
-    public String update(@PathVariable(name = "id") Integer id,
-                         @RequestParam(name = "title") String title,
-                         @RequestParam(name = "content") String content) {
-        boardNativeRepository.updateById(id, title, content);
+    public String update(@ModelAttribute BoardDTO.UpdateDTO reqDTO, @PathVariable(name = "id") Integer id) {
+
+        // 1. 데이터 바인딩 방식 수정
+        // 2. 인증 검사 - 로그인 여부 판단
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/login-form";
+        }
+        // 3. 권한 체크 - 내 글이 맞니?
+        Board board = boardRepository.findById(id);
+        if (board == null) {
+            return "redirect:/error-404";
+        }
+
+        if (!board.getUser().getId().equals(sessionUser.getId())) {
+            return "redirect:/error-403";
+        }
+        // 4. 유효성 검사
+        if (reqDTO.getTitle() == null || reqDTO.getContent() == null
+                || reqDTO.getTitle().trim().length() == 0 || reqDTO.getContent().trim().length() == 0) {
+            return "redirect:/error-400";
+        }
+        // 5. 서비스 측 위임 (직접 구현) - 레파지토리 사용
+        //boardRepository.updateByIdJPQL(id, reqDTO.getTitle(), reqDTO.getContent());
+        boardRepository.updateByIdJPA(id, reqDTO.getTitle(), reqDTO.getContent());
+        // 6. 리다이렉트 처리
+
         return "redirect:/board/" + id;
     }
 }

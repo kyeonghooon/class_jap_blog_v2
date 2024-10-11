@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -18,6 +19,29 @@ public class UserController {
     private final UserRepository userRepository;
     private final HttpSession session;
 
+    @PostMapping
+    public String join(@ModelAttribute UserDTO.JoinDTO reqDTO) {
+        // 유효성 검사 생략
+        userRepository.save(reqDTO.toEntity());
+        return "redirect:/login-form";
+    }
+
+    /**
+     * 회원가입 페이지 요청
+     * 주소설계 : http://localhost:8080/join-form
+     *
+     * @param model
+     * @return 문자열
+     * 반환되는 문자열을 뷰 리졸버가 처리하며
+     * 머스태치 템플릿 엔진을 통해서 뷰 파일을 렌더링 합니다.
+     */
+    @GetMapping("/join-form")
+    public String joinForm(Model model) {
+        log.info("회원가입 페이지");
+        model.addAttribute("name", "회원가입 페이지");
+        return "user/join-form"; // 템플릿 경로 : user/join-form.mustache
+    }
+
     /**
      * 자원에 요청은 GET 방식이지만 보안에 이유로 예외 !
      * 로그인 처리 메서드
@@ -27,6 +51,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
+
     public String login(UserDTO.LoginDTO reqDto) {
         try {
             User sessionUser = userRepository.findByUsernameAndPassword(reqDto.getUsername(), reqDto.getPassword());
@@ -44,22 +69,6 @@ public class UserController {
         return "redirect:/";
     }
 
-
-    /**
-     * 회원가입 페이지 요청
-     * 주소설계 : http://localhost:8080/join-form
-     *
-     * @param model
-     * @return 문자열
-     * 반환되는 문자열을 뷰 리졸버가 처리하며
-     * 머스태치 템플릿 엔진을 통해서 뷰 파일을 렌더링 합니다.
-     */
-    @GetMapping("/join-form")
-    public String joinForm(Model model) {
-        log.info("회원가입 페이지");
-        model.addAttribute("name", "회원가입 페이지");
-        return "user/join-form"; // 템플릿 경로 : user/join-form.mustache
-    }
 
     /**
      * 로그인 페이지 요청
@@ -96,7 +105,10 @@ public class UserController {
         return "user/update-form"; // 템플릿 경로 : user/join-form.mustache
     }
 
-
+    @PostMapping("/user/update")
+    public String update(@ModelAttribute UserDTO.UpdateDTO reqDTO) {
+        return "redirect:/";
+    }
 }
 
 

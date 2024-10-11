@@ -56,14 +56,12 @@ public class BoardRepository {
     /**
      * 게시글 삭제하기
      * @param id
-     * @param userId
      */
     // DELETE JPA API 메서드를 활용(영속성 컨텍트), JPQL --> QDSL ... namedQuery ...
     @Transactional
-    public void deleteById(int id, int userId) {
-        Query jpql = em.createQuery("DELETE FROM Board b WHERE b.id = :id AND b.user.id = :userId");
+    public void deleteById(int id) {
+        Query jpql = em.createQuery("DELETE FROM Board b WHERE b.id = :id");
         jpql.setParameter("id", id);
-        jpql.setParameter("userId", userId);
         jpql.executeUpdate();
     }
 
@@ -71,11 +69,29 @@ public class BoardRepository {
      * JPA API 활용
      */
     // DELETE JPA API 메서드를 활용(영속성 컨텍트), JPQL --> QDSL ... namedQuery ...
-//    @Transactional
-//    public void deleteById(int id, int userId) {
-//        Query jpql = em.createQuery("DELETE FROM Board b WHERE b.id = :id AND b.user.id = :userId");
-//        jpql.setParameter("id", id);
-//        jpql.setParameter("userId", userId);
-//        jpql.executeUpdate();
-//    }
+    @Transactional
+    public void deleteByIdWithAPI(int id) {
+        em.remove(findById(id));
+    }
+
+    @Transactional
+    public void updateByIdJPQL(int id, String title, String content) {
+        Query jpql = em.createQuery("UPDATE Board b SET b.title = :title, b.content = :content WHERE b.id = :id");
+        jpql.setParameter("title", title);
+        jpql.setParameter("content", content);
+        jpql.setParameter("id", id);
+        jpql.executeUpdate();
+    }
+
+    @Transactional
+    public void updateByIdJPA(int id, String title, String content) {
+        Board board = em.find(Board.class, id);
+        if (board != null) {
+            board.setTitle(title);
+            board.setContent(content);
+        }
+        // flush 명령, commit 명령 할 필요 없이
+        // 트랜잭션을 선언하면 --> 더티 체킹
+        em.merge(board);
+    }
 }

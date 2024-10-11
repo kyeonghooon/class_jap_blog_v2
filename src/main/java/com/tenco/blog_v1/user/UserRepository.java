@@ -12,6 +12,17 @@ public class UserRepository {
     private final EntityManager em;
 
     /**
+     * 사용자 저장 메서드 (JPA API 사용)
+     * @param user
+     * @return 저장된 사용자 엔티티
+     */
+    public User save(User user) {
+        // JPQL은 INSERT 구문을 직접 지원하지 않는다.
+        em.persist(user); // 영속화
+        return user;
+    }
+
+    /**
      * 사용자 이름과 비밀번호로 사용자 조회
      * @param username
      * @param password

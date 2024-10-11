@@ -1,0 +1,29 @@
+{{> layout/header}}
+<main class="container p-5 content">
+    <article>
+        <div class="card">
+            <div class="card-header"><b>글수정화면 입니다</b></div>
+            <div class="card-body">
+                <form action="/board/{{board.id}}/update" method="post">
+                    <!-- 작성자 이름 -->
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="username" placeholder="enter username" value="{{board.user.username}}" readonly>
+                    </div>
+
+                    <!-- 제목 입력 -->
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="title" placeholder="enter title" value="{{board.title}}" required>
+                    </div>
+
+                    <!-- 내용 입력 -->
+                    <div class="mb-3">
+                        <textarea name="content" rows="5" class="form-control" required>{{board.content}}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary form-controller">글 수정하기</button>
+                </form>
+            </div>
+        </div>
+    </article>
+</main>
+{{> layout/footer}}

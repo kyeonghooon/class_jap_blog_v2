@@ -18,4 +18,19 @@ public class BoardDTO {
                     .build();
         }
     }
+
+    @Data
+    public static class UpdateDTO {
+        private String title;
+        private String content;
+
+        public Board toEntity(User user, Integer id) {
+            return Board.builder()
+                    .title(title)
+                    .content(content)
+                    .user(user)
+                    .id(id)
+                    .build();
+        }
+    }
 }
