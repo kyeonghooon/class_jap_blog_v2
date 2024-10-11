@@ -27,6 +27,9 @@ public class User {
     private String password;
     private String email;
 
+    @Column(nullable = false)
+    private String role;
+
     @CreationTimestamp // 엔티티 생성시 자동으로 현재 시간 입력
     private Timestamp createdAt;
 
