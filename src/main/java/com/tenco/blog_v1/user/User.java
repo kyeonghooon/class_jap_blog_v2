@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @Builder
+@ToString
 @Entity
 @Table(name = "user_tb")
 public class User {
