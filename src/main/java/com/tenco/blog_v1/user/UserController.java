@@ -16,15 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class UserController {
 
     // DI 처리
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final HttpSession session;
-
-    @PostMapping
-    public String join(@ModelAttribute UserDTO.JoinDTO reqDTO) {
-        // 유효성 검사 생략
-        userRepository.save(reqDTO.toEntity());
-        return "redirect:/login-form";
-    }
 
     /**
      * 회원가입 페이지 요청
@@ -42,25 +35,11 @@ public class UserController {
         return "user/join-form"; // 템플릿 경로 : user/join-form.mustache
     }
 
-    /**
-     * 자원에 요청은 GET 방식이지만 보안에 이유로 예외 !
-     * 로그인 처리 메서드
-     * 요청 주소 POST : http://localhost:8080/login
-     *
-     * @param reqDto
-     * @return
-     */
-    @PostMapping("/login")
-
-    public String login(UserDTO.LoginDTO reqDto) {
-        try {
-            User sessionUser = userRepository.findByUsernameAndPassword(reqDto.getUsername(), reqDto.getPassword());
-            session.setAttribute("sessionUser", sessionUser);
-            return "redirect:/";
-        } catch (Exception e) {
-            // 로그인 실패
-            return "redirect:/login-form?error";
-        }
+    @PostMapping
+    public String join(@ModelAttribute UserDTO.JoinDTO reqDTO) {
+        // 유효성 검사 생략
+        userService.signUp(reqDTO);
+        return "redirect:/login-form";
     }
 
     @GetMapping("/logout")
@@ -90,6 +69,27 @@ public class UserController {
     }
 
     /**
+     * 자원에 요청은 GET 방식이지만 보안에 이유로 예외 !
+     * 로그인 처리 메서드
+     * 요청 주소 POST : http://localhost:8080/login
+     *
+     * @param reqDto
+     * @return
+     */
+    @PostMapping("/login")
+
+    public String login(UserDTO.LoginDTO reqDto) {
+        try {
+            User sessionUser = userService.signIn(reqDto);
+            session.setAttribute("sessionUser", sessionUser);
+            return "redirect:/";
+        } catch (Exception e) {
+            // 로그인 실패
+            return "redirect:/login-form?error";
+        }
+    }
+
+    /**
      * 회원 정보 수정 페이지 요청
      * 주소설계 : http://localhost:8080/user/update-form
      *
@@ -107,6 +107,9 @@ public class UserController {
 
     @PostMapping("/user/update")
     public String update(@ModelAttribute UserDTO.UpdateDTO reqDTO) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        sessionUser = userService.updateUser(reqDTO, sessionUser.getId());
+        session.setAttribute("sessionUser", sessionUser);
         return "redirect:/";
     }
 }
