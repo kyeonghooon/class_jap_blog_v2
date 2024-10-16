@@ -1,5 +1,6 @@
 package com.tenco.blog_v1.board;
 
+import com.tenco.blog_v1.reply.Reply;
 import com.tenco.blog_v1.user.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "board_tb")
@@ -36,6 +39,10 @@ public class Board {
     // 즉, JPA 메모리상에서만 활용 가능한 필드이다.
     @Transient
     private boolean boardOwner;
+
+    // 댓글 엔티티를 넣어서 관계 설정하면 -- 양방향
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    private List<Reply> replies = new ArrayList<>();
 
     @Builder
     public Board(Integer id, String title, String content, User user, Timestamp createdAt) {
