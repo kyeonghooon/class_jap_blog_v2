@@ -41,7 +41,7 @@ public class Board {
     private boolean boardOwner;
 
     // 댓글 엔티티를 넣어서 관계 설정하면 -- 양방향
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Reply> replies = new ArrayList<>();
 
     @Builder

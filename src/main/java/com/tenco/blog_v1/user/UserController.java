@@ -35,7 +35,7 @@ public class UserController {
         return "user/join-form"; // 템플릿 경로 : user/join-form.mustache
     }
 
-    @PostMapping
+    @PostMapping("/join")
     public String join(@ModelAttribute UserDTO.JoinDTO reqDTO) {
         // 유효성 검사 생략
         userService.signUp(reqDTO);
@@ -82,7 +82,7 @@ public class UserController {
         try {
             User sessionUser = userService.signIn(reqDto);
             session.setAttribute("sessionUser", sessionUser);
-            return "redirect:/";
+            return "redirect:";
         } catch (Exception e) {
             // 로그인 실패
             return "redirect:/login-form?error";

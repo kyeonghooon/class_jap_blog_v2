@@ -40,7 +40,7 @@ public class Reply {
 
     // JPA 엔티티에서 데이터베이스에 저장할 필요가 없는 필드를 정의할 때 사용한다.
     @Transient
-    private boolean isReplyOwner;
+    private boolean replyOwner;
 
     @Builder.Default
     private String status = "ACTIVE"; // 댓글 상태 (ACTIVE, DELETED)

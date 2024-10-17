@@ -29,13 +29,25 @@ public class BoardService {
      * 게시글 상세보기 서비스, 게시글 주인 여부 판별
      */
     public Board getBoardDetails(Integer boardId, User sessionUser) {
+        // 1번 전략
+//        Board board = boardJPARepository
+//                .findById(boardId)
+//                .orElseThrow(() -> new Exception404("존재하지 않는 게시글입니다."));
+
+        // 2번 전략
         Board board = boardJPARepository
-                .findById(boardId)
+                .findByIdJoinUser(boardId)
                 .orElseThrow(() -> new Exception404("존재하지 않는 게시글입니다."));
+
         boolean boardOwner = false;
         if (board.getUser().getId().equals(sessionUser.getId())) {
             boardOwner = true;
         }
+
+        // 내가 작성한 댓글인가를 구현 해야 한다.
+        board.getReplies().forEach(reply -> {
+            reply.setReplyOwner(sessionUser.getId().equals(reply.getUser().getId()));
+        });
         board.setBoardOwner(boardOwner);
         return board;
     }
