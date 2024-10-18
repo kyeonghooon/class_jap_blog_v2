@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // @Component  // IOC
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -20,9 +23,15 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        List<String> loginAddPath = new ArrayList<>();
+        loginAddPath.add("/board/**");
+        loginAddPath.add("/user/**");
+        loginAddPath.add("/reply/**");
+        List<String> loginExculdePath = new ArrayList<>();
+        loginExculdePath.add("/board/{id:\\d+}");
         registry.addInterceptor(loginInterceptor)
-                .addPathPatterns("/**")  // 인터셉터를 적용할 경로 패턴 설정
-                .excludePathPatterns("/public/**", "/login-form", "/login", "/join-form", "/join", "/"); // 인터셉터를 제외할 경로 패턴 설정
+                .addPathPatterns(loginAddPath)  // 인터셉터를 적용할 경로 패턴 설정
+                .excludePathPatterns(loginExculdePath); // 인터셉터를 제외할 경로 패턴 설정
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/admin/**");
     }

@@ -100,6 +100,11 @@ public class UserController {
      */
     @GetMapping("/user/update-form")
     public String updateForm(Model model) {
+
+        // @SessionAttribute(name = "sessionUser") User sessionUser
+        // 이 어노테이션은 모델에 저장되어 있는 세션 값을 바로 가지고 오는 어노테이션이다.
+        // 단, 뷰, 템플릿 엔진에서 접근하도록 설계 되어있다. 권장 x
+
         log.info("회원 수정 페이지");
         model.addAttribute("name", "회원 수정 페이지");
         return "user/update-form"; // 템플릿 경로 : user/join-form.mustache
